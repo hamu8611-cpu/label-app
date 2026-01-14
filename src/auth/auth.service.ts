@@ -1,37 +1,44 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+
+export interface AuthenticatedUser {
+  user_id: string;
+  name: string;
+  email: string;
+}
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+  ) {}
 
-  async login(email: string, password: string) {
-    // メールからユーザーを取得
-    const user = await this.usersService.findByEmail(email);
-    console.log('DEBUG user =', user);
-    console.log('DEBUG user.password =', user?.password);
+  async validateUser(
+    user_id: string,
+    pass: string,
+  ): Promise<AuthenticatedUser | null> {
+    const user = await this.usersService.findOne(user_id);
 
-    if (!user) {
-      throw new UnauthorizedException('ユーザーが存在しません');
+    if (user) {
+      const isMatch = await bcrypt
+        .compare(pass, user.password)
+        .catch(() => pass === user.password);
+      if (isMatch) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-unsafe-assignment
+        const { password, ...result } = user as any;
+        return result as AuthenticatedUser;
+      }
     }
+    return null;
+  }
 
-    if (!user.password) {
-      throw new UnauthorizedException('パスワードが設定されていません');
-    }
-
-    // パスワードチェック
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('パスワードが違います');
-    }
-
-    // ログイン成功
+  login(user: AuthenticatedUser) {
+    const payload = { username: user.user_id, sub: user.user_id };
     return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
+      access_token: this.jwtService.sign(payload),
     };
   }
 }

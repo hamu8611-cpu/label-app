@@ -17,7 +17,8 @@ async function bootstrap() {
 
   // ★ CORS 設定 ★
   app.enableCors({
-    origin: 'http://localhost:3000',
+    // origin を 'http://localhost:3000' から変更
+    origin: '*', // すべての接続元を許可する（開発時のみ）
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });

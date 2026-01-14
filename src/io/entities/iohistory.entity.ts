@@ -1,3 +1,5 @@
+// iohistory.entity.ts (label-app\src\io\entities\iohistory.entity.ts)
+
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity('t_iohistory')
@@ -5,30 +7,35 @@ export class IoHistory {
   @PrimaryGeneratedColumn()
   history_id: number;
 
-  @Column()
-  io_date: Date;
+  @Column({ type: 'date' })
+  io_date: string;
 
-  @Column()
+  @Column({ length: 2 })
   io_type: string;
 
-  @Column()
+  @Column({ length: 6 })
   soko_cd: string;
 
-  @Column()
+  @Column({ length: 10 })
   hin_cd: string;
 
-  @Column('numeric')
+  // --- 修正箇所：管理番号カラムを追加 ---
+  @Column({ length: 20, nullable: true })
+  control_no?: string;
+  // ----------------------------------
+
+  @Column({ type: 'numeric', precision: 10, scale: 2 })
   quantity: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, length: 20 })
   io_user?: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   biko?: string;
 
-  @Column({ type: 'timestamp', default: () => 'now()' })
+  @Column({ type: 'timestamptz', default: () => 'now()' })
   created_at: Date;
 
-  @Column({ type: 'timestamp', default: () => 'now()' })
+  @Column({ type: 'timestamptz', default: () => 'now()' })
   updated_at: Date;
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,56 +13,59 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
-  // パスワードハッシュ用
   private readonly saltRounds = 10;
 
   async create(createUserDto: CreateUserDto) {
-    // パスワードをハッシュ化
+    console.log('--- 届いた生データ ---', createUserDto);
+
+    if (!createUserDto.password) {
+      throw new Error('パスワードが届いていません');
+    }
+
+    const existing = await this.findOne(createUserDto.user_id);
+    if (existing) {
+      throw new ConflictException('このユーザーIDは既に登録されています');
+    }
+
     const hashedPassword = await bcrypt.hash(
       createUserDto.password,
       this.saltRounds,
     );
 
-    // 新しいユーザーを作成
     const user = this.usersRepository.create({
       ...createUserDto,
       password: hashedPassword,
+      create_id: createUserDto.user_id,
+      update_id: createUserDto.user_id,
+      delete_flg: false,
     });
 
     return this.usersRepository.save(user);
   }
 
   findAll() {
-    return this.usersRepository.find();
+    return this.usersRepository.find({ where: { delete_flg: false } });
   }
 
-  findOne(id: number) {
-    return this.usersRepository.findOne({ where: { id } });
+  async findOne(user_id: string) {
+    return this.usersRepository.findOne({ where: { user_id } });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(user_id: string, updateUserDto: UpdateUserDto) {
     const updateData: Partial<User> = { ...updateUserDto };
-
-    // パスワード更新のときだけハッシュ化
     if (updateUserDto.password) {
       updateData.password = await bcrypt.hash(
         updateUserDto.password,
         this.saltRounds,
       );
     }
-
-    await this.usersRepository.update(id, updateData);
-    return this.findOne(id);
+    updateData.update_id = user_id;
+    await this.usersRepository.update(user_id, updateData);
+    return this.findOne(user_id);
   }
 
-  async remove(id: number) {
-    await this.usersRepository.delete(id);
+  async remove(user_id: string) {
+    await this.usersRepository.update(user_id, { delete_flg: true });
     return { deleted: true };
-  }
-
-  async findByEmail(email: string): Promise<User | null> {
-    return this.usersRepository.findOne({
-      where: { email },
-    });
   }
 }

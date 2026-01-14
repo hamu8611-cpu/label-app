@@ -9,7 +9,7 @@ export class IoHistory {
   io_date: string;
 
   @Column({ length: 2 })
-  io_type: string; // IN / OUT / AD
+  io_type: string; // 入庫：1 / 出庫：2
 
   @Column({ length: 6 })
   soko_cd: string;
@@ -20,15 +20,18 @@ export class IoHistory {
   @Column({ type: 'numeric', precision: 10, scale: 2 })
   quantity: number;
 
+  @Column({ name: 'control_no', length: 20, nullable: true })
+  control_no: string;
+
   @Column({ nullable: true, length: 20 })
   io_user: string;
 
   @Column({ type: 'text', nullable: true })
   biko: string;
 
-  @Column({ type: 'timestamp', default: () => 'now()' })
+  @Column({ type: 'timestamptz', default: () => 'now()' })
   created_at: Date;
 
-  @Column({ type: 'timestamp', default: () => 'now()' })
+  @Column({ type: 'timestamptz', default: () => 'now()' })
   updated_at: Date;
 }

@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 
@@ -8,7 +8,17 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() body: LoginDto) {
-    console.log('DEBUG controller body =', body);
-    return this.authService.login(body.email, body.password);
+    const user = await this.authService.validateUser(
+      body.user_id,
+      body.password,
+    );
+
+    if (!user) {
+      throw new UnauthorizedException(
+        'ユーザーIDまたはパスワードが正しくありません',
+      );
+    }
+
+    return this.authService.login(user);
   }
 }

@@ -1,26 +1,29 @@
-// src/io/dto/io-register.dto.ts
-
-import { IsString, IsNotEmpty, IsNumber } from 'class-validator';
+import { IsString, IsNumber, IsOptional } from 'class-validator';
 
 export class IoRegisterDto {
   @IsString()
-  @IsNotEmpty()
-  soko_cd: string;
+  io_type: string; // IN / OUT
 
   @IsString()
-  @IsNotEmpty()
-  hin_cd: string;
+  io_date: string; //
 
   @IsString()
-  @IsNotEmpty()
-  io_type: string;
-
-  @IsNumber({}, { message: '数量は数値を指定してください' })
-  quantity: number;
+  soko_cd: string; //
 
   @IsString()
-  io_user?: string;
+  hin_cd: string; //
 
   @IsString()
-  biko?: string;
+  @IsOptional() // 管理番号は空でもOKにする
+  control_no?: string;
+
+  @IsNumber()
+  quantity: number; //
+
+  @IsOptional()
+  @IsString()
+  biko?: string; //
+
+  @IsString()
+  io_user: string; //
 }

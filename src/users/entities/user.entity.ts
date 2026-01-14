@@ -1,19 +1,38 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+// user.entity.ts
+import {
+  Entity,
+  PrimaryColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
-@Entity('users') // テーブル名を指定
+@Entity('m_user')
 export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryColumn({ type: 'varchar', length: 6 })
+  user_id: string;
 
-  @Column({ nullable: true })
-  password: string;
-
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   name: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   email: string;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({ type: 'varchar' })
+  password: string;
+
+  @Column({ type: 'varchar', length: 6 })
+  create_id: string;
+
+  @CreateDateColumn({ type: 'timestamptz', precision: 6 })
   created_at: Date;
+
+  @Column({ type: 'varchar', length: 6 })
+  update_id: string;
+
+  @UpdateDateColumn({ type: 'timestamptz', precision: 6 })
+  updated_at: Date;
+
+  @Column({ type: 'boolean', default: false })
+  delete_flg: boolean;
 }

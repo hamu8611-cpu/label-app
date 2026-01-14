@@ -1,9 +1,10 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, Length } from 'class-validator';
 
 export class LoginDto {
   @IsString()
   @IsNotEmpty()
-  email: string;
+  @Length(6, 6) // ユーザーIDは6桁固定
+  user_id: string;
 
   @IsString()
   @IsNotEmpty()

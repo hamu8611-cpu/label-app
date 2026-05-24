@@ -21,6 +21,10 @@ export class User {
   @Column({ type: 'varchar' })
   password: string;
 
+  // ★ これを追加：ALSOKカードのシリアル番号
+  @Column({ nullable: true })
+  card_id: string;
+
   @Column({ type: 'varchar', length: 6 })
   create_id: string;
 

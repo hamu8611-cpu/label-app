@@ -1,4 +1,5 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { CreateUserDto } from './create-user.dto'; // パスを修正
+import { CreateUserDto } from './create-user.dto';
 
-export class UpdateUserDto extends PartialType(CreateUserDto) {} // exportを追加
+// PartialTypeを使うことで、CreateUserDtoの全項目を「任意」として継承します
+export class UpdateUserDto extends PartialType(CreateUserDto) {}

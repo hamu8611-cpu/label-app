@@ -2,28 +2,41 @@ import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import * as fs from 'fs';
+import * as path from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // --- HTTPS 証明書の読み込み ---
+  const httpsOptions = {
+    key: fs.readFileSync(
+      path.join(__dirname, '../../frontend/certificates/localhost-key.pem'),
+    ),
+    cert: fs.readFileSync(
+      path.join(__dirname, '../../frontend/certificates/localhost.pem'),
+    ),
+  };
 
-  // ★ ValidationPipe を有効化（class-validator が動く）★
+  const app = await NestFactory.create(AppModule, {
+    httpsOptions, // HTTPS を有効化
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // DTO に存在しないプロパティを除去
-      forbidNonWhitelisted: false, // 不要なら true にしてもよい
-      transform: true, // DTO を自動変換
+      whitelist: true,
+      transform: true,
     }),
   );
 
-  // ★ CORS 設定 ★
   app.enableCors({
-    // origin を 'http://localhost:3000' から変更
-    origin: '*', // すべての接続元を許可する（開発時のみ）
+    origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
 
-  await app.listen(process.env.PORT ?? 3001);
+  const port = process.env.PORT ?? 3001;
+  // 外部接続を許可するために '0.0.0.0' を指定
+  await app.listen(port, '0.0.0.0');
+  console.log(`Backend running on: https://192.168.10.6:${port}`);
 }
 
 void (async () => {

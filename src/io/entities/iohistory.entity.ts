@@ -1,4 +1,4 @@
-// iohistory.entity.ts (label-app\src\io\entities\iohistory.entity.ts)
+// iohistory.entity.ts (backend\src\io\entities\iohistory.entity.ts)
 
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 

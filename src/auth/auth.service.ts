@@ -36,9 +36,25 @@ export class AuthService {
   }
 
   login(user: AuthenticatedUser) {
-    const payload = { username: user.user_id, sub: user.user_id };
+    const payload = {
+      sub: user.user_id, // JWTの標準的なID保持用
+      userid: user.user_id, // アプリケーション用ID
+      Tname: user.name, // アプリケーション用表示名
+    };
     return {
       access_token: this.jwtService.sign(payload),
     };
+  }
+
+  // ★ これを追加：ALSOKカード認証用のメソッド
+  async validateCardUser(card_id: string): Promise<AuthenticatedUser | null> {
+    const user = await this.usersService.findByCardId(card_id);
+    if (user) {
+      // passwordを分割代入で除外し、残りをAuthenticatedUserとして返す
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...result } = user;
+      return result as AuthenticatedUser;
+    }
+    return null;
   }
 }

@@ -68,4 +68,10 @@ export class UsersService {
     await this.usersRepository.update(user_id, { delete_flg: true });
     return { deleted: true };
   }
+  // ★ これを追加：card_idでユーザーを検索するメソッド
+  async findByCardId(card_id: string): Promise<User | null> {
+    return this.usersRepository.findOne({
+      where: { card_id, delete_flg: false },
+    });
+  }
 }

@@ -1,3 +1,4 @@
+// src/auth/auth.controller.ts
 import {
   Controller,
   Post,
@@ -10,6 +11,14 @@ import {
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+
+// ★ TypeScriptのエラーを消すための型定義
+interface RequestWithUser {
+  user: {
+    userid: string;
+    Tname: string;
+  };
+}
 
 @Controller('auth')
 export class AuthController {
@@ -38,13 +47,18 @@ export class AuthController {
     return this.authService.login(user);
   }
 
-  // ★ 修正：型を { user: { username: string } } と明示して any エラーを回避
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  getMe(@Request() req: { user: { userid: string; Tname: string } }) {
+  getMe(@Request() req: unknown) {
+    // ★ any を unknown に変更して安全にキャスト
+    const authenticatedReq = req as RequestWithUser;
+
+    // ★ フロントエンドがどの名前(キー)を欲しがっていても100%名前が届くように全て返します
     return {
-      userid: req.user.userid,
-      Tname: req.user.Tname, // ★ tname ではなく Tname
+      user_id: authenticatedReq.user.userid,
+      name: authenticatedReq.user.Tname,
+      userid: authenticatedReq.user.userid,
+      Tname: authenticatedReq.user.Tname,
     };
   }
 }

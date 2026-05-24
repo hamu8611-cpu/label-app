@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 async function bootstrap() {
+  process.env.TZ = 'Asia/Tokyo'; // ★ タイムゾーン東京
   // --- HTTPS 証明書の読み込み ---
   const httpsOptions = {
     key: fs.readFileSync(
@@ -36,7 +37,7 @@ async function bootstrap() {
   const port = process.env.PORT ?? 3001;
   // 外部接続を許可するために '0.0.0.0' を指定
   await app.listen(port, '0.0.0.0');
-  console.log(`Backend running on: https://192.168.10.6:${port}`);
+  console.log(`Backend running on: https://192.168.10.15:${port}`);
 }
 
 void (async () => {

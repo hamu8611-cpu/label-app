@@ -1,3 +1,4 @@
+// auth.service.ts
 import { Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
@@ -20,16 +21,19 @@ export class AuthService {
     user_id: string,
     pass: string,
   ): Promise<AuthenticatedUser | null> {
-    const user = await this.usersService.findOne(user_id);
+    // ★ 修正: findOne から findRawOne に変更して、生のUserオブジェクト(パスワード入り)を取得
+    const user = await this.usersService.findRawOne(user_id);
 
     if (user) {
       const isMatch = await bcrypt
         .compare(pass, user.password)
         .catch(() => pass === user.password);
       if (isMatch) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-unsafe-assignment
-        const { password, ...result } = user as any;
-        return result as AuthenticatedUser;
+        return {
+          user_id: user.user_id,
+          name: user.name,
+          email: user.email,
+        } as AuthenticatedUser;
       }
     }
     return null;
@@ -37,23 +41,24 @@ export class AuthService {
 
   login(user: AuthenticatedUser) {
     const payload = {
-      sub: user.user_id, // JWTの標準的なID保持用
-      userid: user.user_id, // アプリケーション用ID
-      Tname: user.name, // アプリケーション用表示名
+      sub: user.user_id,
+      userid: user.user_id,
+      Tname: user.name,
     };
     return {
       access_token: this.jwtService.sign(payload),
     };
   }
 
-  // ★ これを追加：ALSOKカード認証用のメソッド
   async validateCardUser(card_id: string): Promise<AuthenticatedUser | null> {
+    // ここで UsersService に追加した findByCardId を呼び出す
     const user = await this.usersService.findByCardId(card_id);
     if (user) {
-      // passwordを分割代入で除外し、残りをAuthenticatedUserとして返す
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password, ...result } = user;
-      return result as AuthenticatedUser;
+      return {
+        user_id: user.user_id,
+        name: user.name,
+        email: user.email,
+      } as AuthenticatedUser;
     }
     return null;
   }

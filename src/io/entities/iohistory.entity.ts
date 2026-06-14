@@ -32,10 +32,23 @@ export class IoHistory {
 
   @Column({ type: 'text', nullable: true })
   biko?: string;
+  // 💡 追加：作成者ID（カラム名を明示）
+  @Column({ name: 'create_id', nullable: true })
+  create_id?: string;
 
   @Column({ type: 'timestamptz', default: () => 'now()' })
   created_at: Date;
+  // 💡 追加：更新者ID（カラム名を明示）
+  @Column({ name: 'update_id', nullable: true })
+  update_id?: string;
 
   @Column({ type: 'timestamptz', default: () => 'now()' })
   updated_at: Date;
+
+  // 💡 追加：論理削除フラグ（初期値は false）
+  @Column({ name: 'delete_flg', type: 'boolean', default: false })
+  delete_flg: boolean;
+
+  // leftJoinAndMapOneの受け皿となるプロパティ（DBのカラムとしては存在しない）
+  user?: any;
 }

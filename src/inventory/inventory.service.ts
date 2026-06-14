@@ -6,6 +6,8 @@ import { InventorySearchDto } from './inventory-search.dto';
 import { InventoryResultDto } from './inventory-result.dto';
 import { Soko } from '../soko-master/soko.entity';
 import { Hin } from '../hin/hin.entity';
+import { IoHistory } from '../io/entities/iohistory.entity';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class InventoryService {
@@ -18,8 +20,30 @@ export class InventoryService {
 
     @InjectRepository(Hin)
     private readonly hinRepo: Repository<Hin>,
-  ) {}
 
+    @InjectRepository(IoHistory)
+    private readonly ioHistoryRepo: Repository<IoHistory>,
+  ) {}
+  /**
+   * 入出庫履歴の一覧取得（担当者名付き）
+   */
+  async getIoHistoryWithUserName() {
+    // QueryBuilderを生成（t_iohistory が基点）
+    const qb = this.ioHistoryRepo
+      .createQueryBuilder('io')
+      // 担当者マスタを左結合し、'io.user' プロパティにマッピングする
+      .leftJoinAndMapOne(
+        'io.user', // エンティティオブジェクト内にネストさせるプロパティ名
+        User, // 担当者マスタのエンティティクラス
+        'u', // エイリアス名
+        'io.io_user = u.user_id', // 結合条件（io_user と user_id を紐付け）
+      );
+
+    // 実行してエンティティを取得
+    const histories = await qb.getMany();
+
+    return histories;
+  }
   /**
    * 品目マスタ基準の在庫検索
    */
@@ -42,7 +66,7 @@ export class InventoryService {
     }
 
     if (dto.hin_cd) {
-      qb.andWhere('hin.hin_cd LIKE :hin_cd', { hin_cd: `%${dto.hin_cd}%` });
+      qb.andWhere('hin.hin_cd = :hin_cd', { hin_cd: dto.hin_cd });
     }
 
     if (dto.hin_name) {

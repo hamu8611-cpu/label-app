@@ -37,7 +37,7 @@ async function bootstrap() {
   const port = process.env.PORT ?? 3001;
   // 外部接続を許可するために '0.0.0.0' を指定
   await app.listen(port, '0.0.0.0');
-  console.log(`Backend running on: https://192.168.10.15:${port}`);
+  console.log(`Backend running on: https://192.168.10.8:${port}`);
 }
 
 void (async () => {

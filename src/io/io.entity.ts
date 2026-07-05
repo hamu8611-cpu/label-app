@@ -29,9 +29,18 @@ export class IoHistory {
   @Column({ type: 'text', nullable: true })
   biko: string;
 
+  @Column({ nullable: true, length: 20 })
+  create_id: string;
+
   @Column({ type: 'timestamptz', default: () => 'now()' })
   created_at: Date;
 
+  @Column({ nullable: true, length: 20 })
+  update_id: string;
+
   @Column({ type: 'timestamptz', default: () => 'now()' })
   updated_at: Date;
+
+  @Column({ type: 'boolean', default: false })
+  delete_flg: boolean;
 }

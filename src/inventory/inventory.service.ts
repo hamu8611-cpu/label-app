@@ -45,6 +45,12 @@ export class InventoryService {
     return histories;
   }
   /**
+   * ✨ 追加：現在の在庫データを全件取得するメソッド
+   */
+  async findAll(): Promise<Inventory[]> {
+    return this.inventoryRepo.find();
+  }
+  /**
    * 品目マスタ基準の在庫検索
    */
   async search(dto: InventorySearchDto): Promise<InventoryResultDto[]> {
